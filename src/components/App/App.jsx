@@ -1,5 +1,5 @@
 import { Component } from 'react';
-// import { ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 // import { nanoid } from 'nanoid';
 
 import { Modal } from 'components/Modal/Modal';
@@ -36,6 +36,7 @@ export class App extends Component {
         </button>
         {this.state.showModal && <Modal onClose={this.toggleModal} />}
         <SearchBar onSubmit={this.handelFormSubmit} />
+        <ToastContainer />
       </div>
     );
   }

@@ -16,7 +16,7 @@ export class SearchBar extends Component {
 
     if (this.state.search.trim() === '') {
       alert('Erorrrrre');
-
+      // toast.error('12345');
       return;
     }
     this.props.onSubmit(this.state.search);
