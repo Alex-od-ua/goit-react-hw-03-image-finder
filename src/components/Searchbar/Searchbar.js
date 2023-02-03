@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import { FcSearch } from 'react-icons/fc';
 
@@ -20,14 +21,14 @@ export class Searchbar extends Component {
     const { onSubmit } = this.props;
 
     onSubmit({ ...this.state });
-    this.reset();
+    // this.reset();
   };
 
-  reset() {
-    this.setState({
-      search: '',
-    });
-  }
+  // reset() {
+  //   this.setState({
+  //     search: '',
+  //   });
+  // }
 
   render() {
     const { search } = this.state;
@@ -56,3 +57,7 @@ export class Searchbar extends Component {
     );
   }
 }
+
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};
