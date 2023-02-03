@@ -15,7 +15,7 @@ export class SearchBar extends Component {
     event.preventDefault();
 
     if (this.state.search.trim() === '') {
-      alert('Erorrrrre');
+      alert('Error');
       // toast.error('12345');
       return;
     }
