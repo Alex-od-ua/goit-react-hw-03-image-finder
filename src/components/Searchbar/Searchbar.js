@@ -1,46 +1,55 @@
 import { Component } from 'react';
-import { ImSearch } from 'react-icons/im';
-// import { toast } from 'react-toastify';
 
-export class SearchBar extends Component {
+import { FcSearch } from 'react-icons/fc';
+
+import css from './SearchBar.module.css';
+
+export class Searchbar extends Component {
   state = {
     search: '',
   };
 
-  handleSearchChange = event => {
-    this.setState({ search: event.currentTarget.value });
+  handleChange = ({ target }) => {
+    const { name, value } = target;
+    this.setState({ [name]: value });
   };
 
-  handleSubmit = event => {
-    event.preventDefault();
+  handleSubmit = e => {
+    e.preventDefault();
 
-    if (this.state.search.trim() === '') {
-      alert('Error');
-      // toast.error('12345');
-      return;
-    }
-    this.props.onSubmit(this.state.search);
+    const { onSubmit } = this.props;
 
-    this.setState({ search: '' });
+    onSubmit({ ...this.state });
+    this.reset();
   };
+
+  reset() {
+    this.setState({
+      search: '',
+    });
+  }
 
   render() {
+    const { search } = this.state;
+    const { handleChange, handleSubmit } = this;
+
     return (
-      <header className="searchbar">
-        <form className="form" onSubmit={this.handleSubmit}>
-          <button type="submit" className="button">
-            <ImSearch />
-            <span className="button-label">Search</span>
+      <header className={css.Searchbar}>
+        <form className={css.SearchForm} onSubmit={handleSubmit}>
+          <button type="submit" className={css.SearchForm__button}>
+            <FcSearch />
+            <span className={css.SearchForm__button__label}>Search</span>
           </button>
 
           <input
-            onChange={this.handleSearchChange}
-            className="input"
-            value={this.state.value}
+            className={css.SearchForm__input}
+            name="search"
             type="text"
+            value={search}
             autoComplete="off"
             autoFocus
-            placeholder="Search images and photos"
+            onChange={handleChange}
+            required
           />
         </form>
       </header>

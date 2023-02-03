@@ -1,86 +1,100 @@
 import { Component } from 'react';
-// import { ToastContainer } from 'react-toastify';
-// import { nanoid } from 'nanoid';
 
-import { fetchImages } from 'components/services/api';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import { searchImages } from 'services/api';
+
+import { Searchbar } from 'components/Searchbar/Searchbar';
+import { ImageGallery } from 'components/ImageGallery/ImageGallery';
+import { Loader } from 'components/Loader/Loader';
+import { Button } from 'components/Button/Button';
 import { Modal } from 'components/Modal/Modal';
-import { SearchBar } from 'components/Searchbar/Searchbar';
 
-// import css from './styles.css';
-
-// import css from './App.module.css';
+import css from './App.module.css';
 
 export class App extends Component {
   state = {
     search: '',
-    showModal: false,
-    loading: false,
-    images: [],
     page: 1,
+    pictures: [],
+    loading: false,
     error: null,
+    currentImage: null,
     status: 'idle',
   };
 
-  componentDidUpdate(prevProps, prevstate) {
-    const prevSearchValue = prevProps.search;
-    const nextSearchValue = this.state.search;
-
-    if (prevSearchValue !== nextSearchValue) {
-      this.searchImages();
+  componentDidUpdate(prevProps, prevState) {
+    // const prevSearchValue = prevProps.search;
+    // const nextSearchValue = this.state.search;
+    const { search, page } = this.state;
+    if (prevState.search !== search || prevState.page !== page) {
+      this.fetchPictures();
     }
   }
 
-  async searchImages() {
+  async fetchPictures() {
     try {
       this.setState({ loading: true });
       const { search, page } = this.state;
-      const searchValue = search.trim().toLowerCase();
-      const data = await fetchImages(searchValue, page);
-      if (data.hits.length === 0) {
-        alert(`Sorry! We didn't find anything, change your request!`);
-        return;
+
+      const hits = await searchImages(search, page);
+
+      if (hits.length === 0) {
+        toast.error('Sorry, there are no available images.');
       }
-      this.setState({
-        images: data.hits,
-        status: 'resolved',
-        totalHits: data.totalHits,
-      });
-      return;
+
+      this.setState(({ pictures }) => ({
+        pictures: [...pictures, ...hits],
+      }));
     } catch (error) {
-      this.setState({ status: 'rejected', error: error.message, images: null });
-      alert('Opps! Something went wrong!');
+      this.setState({ error: error.message, pictures: [] });
     } finally {
       this.setState({ loading: false });
     }
   }
 
-  handelFormSubmit = inputValue => {
-    console.log(inputValue);
-
-    if (inputValue === this.state.search) {
-      alert('This is the same query!');
+  searchPictures = ({ search }) => {
+    if (search === this.state.search) {
+      toast.error('This is the same query!');
       return;
     }
 
-    this.setState({ search: inputValue, images: [], page: 1 });
-    // console.log(this.state.inputValue);
+    this.setState({ search, pictures: [], page: 1 });
   };
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
+  showPicture = img => {
+    this.setState({
+      currentImage: img,
+    });
+  };
+
+  closeModal = () => {
+    this.setState({ currentImage: null });
+  };
+
+  loadMore = () => {
+    this.setState(({ page }) => ({ page: page + 1 }));
   };
 
   render() {
+    const { loading, error, pictures, currentImage } = this.state;
+    const { searchPictures, loadMore, showPicture, closeModal } = this;
+
     return (
-      <div>
-        <button type="button" onClick={this.toggleModal}>
-          open
-        </button>
-        {this.state.showModal && <Modal onClose={this.toggleModal} />}
-        <SearchBar onSubmit={this.handelFormSubmit} />
-        {/* <ToastContainer /> */}
+      <div className={css.App}>
+        <Searchbar onSubmit={searchPictures} />
+
+        {error && <p>{error}</p>}
+        {loading && <Loader />}
+        {ImageGallery && (
+          <ImageGallery pictures={pictures} showPicture={showPicture} />
+        )}
+        {Boolean(pictures.length) && !loading && <Button loadMore={loadMore} />}
+        {currentImage && (
+          <Modal currentImage={currentImage} closeModal={closeModal} />
+        )}
+        <ToastContainer />
       </div>
     );
   }
